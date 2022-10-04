@@ -52,5 +52,8 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: |
         .\.sonar\scanner\dotnet-sonarscanner begin /k:"damonarso_eShopOnWeb" /o:"damonarso" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        dotnet restore ./eShopOnWeb.sln
         dotnet build ./eShopOnWeb.sln --configuration Release
+        dotnet test ./tests/PublicApiIntegrationTests/PublicApiIntegrationTests.csproj --collect:"XPlat Code Coverage" --logger trx --results-directory $GITHUB_WORKSPACE/test/testresults
+        reportgenerator -reports:$GITHUB_WORKSPACE/test/testresults/**/coverage.cobertura.xml -targetdir:$GITHUB_WORKSPACE/test/coverlet/reports -reporttypes:"SonarQube"
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
